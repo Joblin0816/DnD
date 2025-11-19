@@ -4,48 +4,37 @@ This repository contains a GitHub-native D&D text adventure game that runs entir
 
 ## Starting a New Game Session
 
-There are two ways to start a new D&D session:
+When a user asks to "start a new D&D session" or "create a new game session", use the GitHub MCP tool to create an issue.
 
-### Method 1: Create an Issue with Label (Recommended)
+### How to Start a Session:
 
-When a user asks to "start a new D&D session" or "create a new game session":
-
-1. Create a new GitHub issue with:
-   - Title: The session name provided by the user
-   - Label: `dnd-new-session`
-   - Body: Can be empty or contain session details
-
-2. The `start-session.yml` workflow will automatically trigger and:
-   - Initialize the game state file
-   - Change the label from `dnd-new-session` to `dnd-session`
-   - Post a welcome comment with game instructions
-
-### Method 2: Trigger Workflow Directly
-
-Alternatively, trigger the `start-session.yml` workflow via workflow_dispatch:
-- Repository: DomainSoftware/DnD
-- Workflow: start-session.yml
-- Ref: main
-- Inputs: { "session_name": "<the name the user provided>" }
-
-This method will create the issue and initialize it in one step.
+Use `mcp_github_issue_write` with these parameters:
+- **method**: "create"
+- **owner**: "DomainSoftware"
+- **repo**: "DnD"
+- **title**: The session name provided by the user
+- **labels**: ["dnd-new-session"]
+- **body**: "New D&D text adventure session" (or empty)
 
 ### Example User Requests:
 - "Start a new D&D session called 'Friday Night Adventure'"
 - "Create a game session named 'Test Game'"
 - "Begin a new D&D campaign called 'Dragon Quest'"
+- "Start a D&D session called 'My Adventure'"
 
-### How to Respond:
+### What Happens Automatically:
 
-**Preferred approach (Method 1):**
-```
-Create a GitHub issue with:
-- Title: "<session name from user>"
-- Label: "dnd-new-session"
-- Body: "New D&D text adventure session"
-```
+Once the issue is created with the `dnd-new-session` label, the `start-session.yml` workflow will automatically:
+1. Initialize the game state file at `state/session-<issue-number>.json`
+2. Change the label from `dnd-new-session` to `dnd-session`
+3. Post a welcome comment with game instructions
 
-The workflow will automatically initialize it.
+### Example Response:
+
+After creating the issue, tell the user:
+- The issue number and URL
+- That the workflow is initializing (takes ~30 seconds)
+- How to play once initialized (use `/look` and `/move` commands in comments)
 
 ## Listing Active Sessions
 

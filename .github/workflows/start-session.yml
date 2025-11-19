@@ -61,7 +61,7 @@ jobs:
           ISSUE_NUMBER: ${{ steps.get_issue.outputs.issue_number }}
         run: |
           mkdir -p state
-          cat > state/session-${ISSUE_NUMBER}.json << 'EOF'
+          cat > state/session-${ISSUE_NUMBER}.json << EOF
           {
             "sessionId": ${ISSUE_NUMBER},
             "turn": 1,
