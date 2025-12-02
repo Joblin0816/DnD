@@ -23,10 +23,16 @@ jobs:
             const fs = require('fs').promises;
             const path = require('path');
             
-            // Get the modified state files from the push
-            const modifiedFiles = context.payload.commits
-              .flatMap(commit => commit.modified || [])
+            // Get all state files that were added or modified in the push
+            const stateFiles = context.payload.commits
+              .flatMap(commit => [
+                ...(commit.added || []),
+                ...(commit.modified || [])
+              ])
               .filter(file => file.startsWith('state/session-') && file.endsWith('.json'));
+            
+            // Remove duplicates (in case a file was added then modified in same push)
+            const modifiedFiles = [...new Set(stateFiles)];
             
             if (modifiedFiles.length === 0) {
               console.log('No state files modified');
