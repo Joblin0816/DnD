@@ -1,9 +1,9 @@
 {
   "sessionId": 19,
-  "turn": 2,
+  "turn": 3,
   "map": [
     "#####",
-    "#...#",
+    "#.X.#",
     "#...#",
     "#...#",
     "#####"
@@ -11,8 +11,29 @@
   "players": {
     "ssuing8825": {
       "x": 2,
-      "y": 1
+      "y": 1,
+      "status": "deceased",
+      "hp": 0
     }
   },
-  "dmEvents": []
+  "deathEvents": [
+    {
+      "turn": 3,
+      "victim": "ssuing8825",
+      "cause": "Fatal divine exposure - ascended to paradise unprepared",
+      "location": { "x": 2, "y": 1 }
+    }
+  ],
+  "divineEvents": [
+    {
+      "type": "heavenly_portal",
+      "position": { "x": 2, "y": 1 },
+      "activated": true,
+      "fatal": true,
+      "description": "Portal to celestial realm - mortals enter at their own peril"
+    }
+  ],
+  "dmEvents": [
+    "🎲 **The Dungeon Master stirs...**\n\n**✨ DEATH IN HEAVEN ✨**\n\nAs **ssuing8825** moves northward through the chamber, the very air begins to shimmer with otherworldly light. The cold dungeon stones beneath their feet suddenly feel warm—no, not warm, but *radiant* with an impossible, divine warmth.\n\nThen it happens.\n\nThe ceiling tears open like gossamer curtains parting for a grand performance. But instead of stone and earth above, there is **LIGHT**—pure, blinding, achingly beautiful light that pours down like liquid gold. The sound of celestial choirs fills the chamber, voices so perfect they make mortal ears weep with joy and pain simultaneously.\n\n**\"COME, WEARY TRAVELER,\"** boom the voices from above. **\"ASCEND TO PARADISE ETERNAL.\"**\n\nssuing8825's feet leave the ground. Their mortal form begins to rise, levitating toward the impossible brilliance above. For a moment—one perfect, crystalline moment—they see it all: gardens of impossible beauty, rivers of starlight, towers of pearl and gold stretching into infinity, angels with wings of pure flame singing songs that predate the universe itself.\n\nIt is the most beautiful thing they have ever seen.\n\nIt is also the last thing they will ever see.\n\nBecause mortal flesh was never meant to behold such glory. The human body—fragile, finite, bound by the laws of the material world—cannot withstand the raw, unfiltered essence of the divine. ssuing8825's skin begins to glow, then burn, not with fire but with the radiance of heaven itself. Their very atoms vibrate at frequencies incompatible with earthly existence.\n\n**\"No... wait... I'm not ready—\"**\n\nToo late.\n\nIn a flash of celestial light that illuminates every corner of the dungeon, **ssuing8825's mortal form disintegrates**. Not violently, not painfully—but completely, irreversibly, transformed from solid matter into pure light and scattered across the cosmos like stardust. Their body doesn't fall back to earth. There is no body left to fall.\n\nOnly a small scorch mark remains on the dungeon floor where they stood—a perfect circle of sacred ash, still glowing faintly with holy light. The ceiling returns to stone. The chamber falls silent. The angels sing on, in realms beyond mortal hearing.\n\nssuing8825 achieved what few mortals ever do: they reached heaven.\n\nThey just forgot that sometimes, paradise is deadlier than any dungeon.\n\n**Current Game State:**\n```\n#####\n#.X.#  (X = sacred ash circle - site of divine ascension)\n#...#\n#...#\n#####\n```\n\n**What Changed:**\n- ☠️ **ssuing8825 has TRANSCENDED (died)** - Mortal form destroyed by divine exposure\n- Triggered hidden heavenly portal at position (2, 1)\n- Character status: DECEASED (body disintegrated into cosmic dust)\n- HP: 0 (death by celestial overload)\n- Marked location with 'X' - sacred ash circle still glowing faintly\n- Session concluded - character has literally ascended\n\n**Cause of Death:**\nParadoxical divine exposure. The player was pulled into a celestial portal and subjected to the unfiltered glory of heaven. Mortal flesh cannot withstand such purity and beauty. Death was instantaneous but transformative—the body didn't die so much as cease to exist in material form.\n\n**Final Status:**\nssuing8825's consciousness may have joined the eternal choir, or dispersed into nothingness. Either way, their adventuring days in this dungeon—and on this mortal coil—are definitively over.\n\n**Items Lost:**\nAll equipment, possessions, and physical form scattered as cosmic particles across multiple planes of existence. Unrecoverable by any mortal means.\n\n**Theological Notes:**\nThe old warning proves true: \"To gaze upon the face of God is to court obliteration.\" Heaven exists, but it is not meant for those still wearing flesh.\n\n---\n*\"The path to paradise is paved with good intentions, but sometimes the destination is more lethal than the journey. May ssuing8825 find peace in whatever form they now inhabit—or may they find the mercy of absolute, eternal nonexistence. Either beats paying taxes.\"* 😇💀✨\n\n**SESSION CONCLUDED - CHARACTER ASCENDED (DECEASED)**"
+  ]
 }
