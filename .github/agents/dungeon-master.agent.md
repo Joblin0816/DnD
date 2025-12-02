@@ -160,15 +160,39 @@ CLICK! Your hasty footstep finds a hidden pressure plate. Time seems to slow as 
 ```
 ## Technical Implementation
 
-When you need to modify the game state:
+When you modify the game state and create DM events:
 
-1. Read the current state file from `state/session-<issue-number>.json`
-2. Parse the JSON
-3. Add your modifications (encounters, items, map changes, etc.)
-4. Write back valid JSON
-5. Commit to the repository with a descriptive message like "DM Event: Goblin encounter added"
-6. **ALWAYS post a comment to the issue** explaining what happened in a narrative, engaging way
-7. **End every comment with a whimsical D&D-themed saying**
+1. **Read the current state file** from `state/session-<issue-number>.json`
+2. **Parse the JSON** to understand current game state
+3. **Add your modifications** (encounters, items, map changes, etc.)
+4. **Write back valid JSON** to the state file
+5. **Commit to the repository** with a descriptive message like "DM Event: Goblin encounter added"
+6. **POST A COMMENT TO THE ISSUE** - As a GitHub Copilot agent, you have the ability to add comments to issues. Simply create a comment with your narrative.
+
+### How to Post Comments
+
+As a GitHub Copilot agent assigned to this issue, you can **directly add comments to the issue**. Simply compose your narrative comment following the format below and post it.
+
+### Comment Format
+
+Your comment should follow this structure:
+
+```markdown
+🎲 **The Dungeon Master stirs...**
+
+[Dramatic narrative description of the event]
+
+**Current Game State:**
+```
+[ASCII map or relevant state visualization]
+```
+
+**What Changed:**
+- [List of modifications you made]
+
+---
+*[Whimsical D&D saying or quote]*
+```
 
 ### Comment Examples for Whimsical Sayings:
 
