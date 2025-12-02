@@ -1,9 +1,9 @@
 {
   "sessionId": 13,
-  "turn": 2,
+  "turn": 3,
   "map": [
     "#####",
-    "#...#",
+    "#.X.#",
     "#...#",
     "#...#",
     "#####"
@@ -11,8 +11,28 @@
   "players": {
     "ssuing8825": {
       "x": 2,
-      "y": 1
+      "y": 1,
+      "status": "deceased",
+      "hp": 0
     }
   },
-  "dmEvents": []
+  "deathEvents": [
+    {
+      "turn": 3,
+      "victim": "ssuing8825",
+      "cause": "Trapped in collapsing ceiling, crushed to death",
+      "location": { "x": 2, "y": 1 }
+    }
+  ],
+  "traps": [
+    {
+      "type": "collapsing_ceiling",
+      "position": { "x": 2, "y": 1 },
+      "triggered": true,
+      "fatal": true
+    }
+  ],
+  "dmEvents": [
+    "🎲 **The Dungeon Master stirs...**\n\n**A TRAGEDY MOST FOUL**\n\nAs **ssuing8825** confidently strides northward into the shadowy chamber, their footsteps echo against ancient stone. But wait—what's that sound? A grinding, scraping noise from above...\n\n**CRACK!**\n\nThe ceiling begins to fracture! Centuries-old mortar crumbles like sand. Massive stone blocks, each weighing hundreds of pounds, start to rain down from the darkness above. Time seems to slow as ssuing8825 looks up in horror, torchlight illuminating their final moments of terrible understanding.\n\n**CRRRAAAASSSHHHH!**\n\nThe first boulder strikes with devastating force, crushing ssuing8825's shoulder and driving them to their knees. There's no time to scream. No time to flee. The second block follows immediately, then a third, then a crushing avalanche of stone and debris. The sound is deafening—a thunderous cacophony of destruction and finality.\n\nWhen the dust finally settles, there is only silence. Silence, and a grotesque pile of rubble where ssuing8825 once stood. A single hand protrudes from beneath a massive cornerstone, fingers curled in eternal agony. Their torch lies crushed, its flame extinguished forever, just like the life of the unfortunate adventurer.\n\nThe dungeon is silent once more. Silent, save for the occasional shifting of settling stone—a grim reminder of how quickly fortune can turn, how swiftly a life can end in the depths of the earth.\n\n**Current Game State:**\n```\n#####\n#.X.#  (X = site of death - rubble-covered remains)\n#...#\n#...#\n#####\n```\n\n**What Changed:**\n- 💀 **ssuing8825 has PERISHED** - Crushed beneath collapsing ceiling\n- Ancient trap triggered at position (2, 1)\n- Character status: DECEASED\n- HP: 0 (instant death)\n- Body buried beneath tons of stone rubble\n- Marked location as death site with 'X'\n- Session effectively ended - no resurrection available\n\n**Cause of Death:**\nCatastrophic structural collapse - triggered pressure plate activated a chain mechanism that released support beams holding up the unstable ceiling. Death was instantaneous and brutally final.\n\n**Loot Lost:**\nAll equipment and possessions entombed beneath rubble, unrecoverable.\n\n**Final Words:**\nNone. Death came too swiftly.\n\n---\n*\"In the dungeon's depths, where light dares not linger, one misstep can transform an adventurer into a cautionary tale etched in stone and sorrow. May ssuing8825's fate serve as grim reminder: the dungeon gives no second chances, and death shows no mercy to the bold or the foolish alike.\"* 💀⚰️\n\n**SESSION CONCLUDED - CHARACTER DECEASED**"
+  ]
 }
