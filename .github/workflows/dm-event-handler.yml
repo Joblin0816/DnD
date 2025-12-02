@@ -21,12 +21,9 @@ jobs:
         with:
           script: |
             const fs = require('fs').promises;
-            const path = require('path');
-            const glob = require('glob');
             
-            // Since the workflow is already filtered by paths, just check all state files
-            // that exist and have pending dmEvents
-            const stateFiles = glob.sync('state/session-*.json');
+            // Use glob to find all state files (glob is already available in github-script)
+            const stateFiles = await glob.create('state/session-*.json').then(g => g.glob());
             
             if (stateFiles.length === 0) {
               console.log('No state files found');
