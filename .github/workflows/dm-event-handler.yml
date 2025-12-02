@@ -42,39 +42,44 @@ jobs:
               
               const sessionId = parseInt(sessionMatch[1]);
               
-              // Read the state file
-              const stateContent = await fs.readFile(stateFilePath, 'utf8');
-              const state = JSON.parse(stateContent);
-              
-              // Check if there are pending DM events
-              if (!state.dmEvents || state.dmEvents.length === 0) {
+              try {
+                // Read the state file
+                const stateContent = await fs.readFile(stateFilePath, 'utf8');
+                const state = JSON.parse(stateContent);
+                
+                // Check if there are pending DM events
+                if (!state.dmEvents || state.dmEvents.length === 0) {
+                  continue;
+                }
+                
+                console.log(`Found ${state.dmEvents.length} DM event(s) for session ${sessionId}`);
+                
+                // Post each DM event as a comment
+                for (const dmEvent of state.dmEvents) {
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: sessionId,
+                    body: dmEvent
+                  });
+                  console.log(`Posted DM event to issue #${sessionId}`);
+                }
+                
+                // Clear the dmEvents array
+                state.dmEvents = [];
+                
+                // Save the updated state file
+                await fs.writeFile(
+                  stateFilePath,
+                  JSON.stringify(state, null, 2),
+                  'utf8'
+                );
+                console.log(`Cleared dmEvents for session ${sessionId}`);
+                processedCount++;
+              } catch (error) {
+                console.log(`Skipping ${stateFilePath}: ${error.message}`);
                 continue;
               }
-              
-              console.log(`Found ${state.dmEvents.length} DM event(s) for session ${sessionId}`);
-              
-              // Post each DM event as a comment
-              for (const dmEvent of state.dmEvents) {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: sessionId,
-                  body: dmEvent
-                });
-                console.log(`Posted DM event to issue #${sessionId}`);
-              }
-              
-              // Clear the dmEvents array
-              state.dmEvents = [];
-              
-              // Save the updated state file
-              await fs.writeFile(
-                stateFilePath,
-                JSON.stringify(state, null, 2),
-                'utf8'
-              );
-              console.log(`Cleared dmEvents for session ${sessionId}`);
-              processedCount++;
             }
             
             if (processedCount === 0) {
