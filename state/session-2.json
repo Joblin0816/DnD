@@ -13,8 +13,8 @@
   "players": {
     "Joblin0816": {
       "x": 5,
-      "y": 5,
-      "hp": 4,
+      "y": 4,
+      "hp": 1,
       "maxHp": 20,
       "atk": 3,
       "inventory": [],
@@ -34,7 +34,7 @@
     "2": {
       "id": 2,
       "x": 5,
-      "y": 2,
+      "y": 3,
       "type": "zombie",
       "hp": 8,
       "atk": 3
@@ -50,7 +50,7 @@
     "4": {
       "id": 4,
       "x": 6,
-      "y": 4,
+      "y": 3,
       "type": "demon",
       "hp": 12,
       "atk": 4
@@ -60,7 +60,7 @@
       "x": 5,
       "y": 4,
       "type": "zombie",
-      "hp": 3,
+      "hp": 1,
       "atk": 3
     },
     "6": {
@@ -116,7 +116,7 @@
       "name": "Shiny Gem ($50)"
     }
   },
-  "turn": 11,
+  "turn": 12,
   "nextMonsterId": 7,
   "nextItemId": 7
 }
