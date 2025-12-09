@@ -1,9 +1,9 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-/**
- * Load the state for a given session
- */
+/* -------------------------
+   Persistence helpers
+   ------------------------- */
 async function loadState(sessionId) {
   const stateFile = path.join(process.cwd(), 'state', `session-${sessionId}.json`);
   try {
@@ -14,9 +14,6 @@ async function loadState(sessionId) {
   }
 }
 
-/**
- * Save the state for a given session
- */
 async function saveState(sessionId, state) {
   const stateFile = path.join(process.cwd(), 'state', `session-${sessionId}.json`);
   try {
@@ -26,12 +23,10 @@ async function saveState(sessionId, state) {
   }
 }
 
-/**
- * Random dungeon generator
- * Produces a state object if called with no existing state
- */
+/* -------------------------
+   Random dungeon generator
+   ------------------------- */
 function generateRandomState(width = 11, height = 9, monsterCount = 6, itemCount = 6) {
-  // Ensure odd width/height for nicer central spawn
   if (width % 2 === 0) width++;
   if (height % 2 === 0) height++;
 
@@ -39,18 +34,15 @@ function generateRandomState(width = 11, height = 9, monsterCount = 6, itemCount
   for (let y = 0; y < height; y++) {
     let row = '';
     for (let x = 0; x < width; x++) {
-      // border walls
       if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
         row += '#';
       } else {
-        // random walls
-        row += (Math.random() < 0.2) ? '#' : '.';
+        row += (Math.random() < 0.18) ? '#' : '.';
       }
     }
     map.push(row);
   }
 
-  // Clear center region for spawn
   const centerY = Math.floor(height / 2);
   const centerX = Math.floor(width / 2);
   map[centerY] = replaceChar(map[centerY], centerX, '.');
@@ -59,17 +51,17 @@ function generateRandomState(width = 11, height = 9, monsterCount = 6, itemCount
 
   const state = {
     map,
-    players: {}, // playerName -> {x,y, hp, maxHp, atk, inventory: []}
-    monsters: {}, // id -> {x,y,type,hp,atk}
-    items: {}, // id -> {x,y,type,name}
+    players: {}, // username -> {x,y,hp,maxHp,atk,inventory:[],xp,level}
+    monsters: {}, // id -> {id,x,y,type,hp,atk}
+    items: {}, // id -> {id,x,y,type,name}
     turn: 0,
     nextMonsterId: 1,
     nextItemId: 1
   };
 
-  // Place monsters randomly on floor tiles
   const floorTiles = getAllFloorTiles(map);
   shuffleArray(floorTiles);
+
   for (let i = 0; i < Math.min(monsterCount, floorTiles.length); i++) {
     const [x, y] = floorTiles[i];
     const type = randomMonsterType();
@@ -78,7 +70,6 @@ function generateRandomState(width = 11, height = 9, monsterCount = 6, itemCount
     state.monsters[id] = { id, x, y, type, hp: stats.hp, atk: stats.atk };
   }
 
-  // Place items randomly on floor tiles (after monsters)
   const leftover = floorTiles.slice(monsterCount);
   shuffleArray(leftover);
   const itemTypes = ['sword', 'potion', 'gem'];
@@ -86,19 +77,15 @@ function generateRandomState(width = 11, height = 9, monsterCount = 6, itemCount
     const [x, y] = leftover[i];
     const type = itemTypes[i % itemTypes.length];
     const id = state.nextItemId++;
-    state.items[id] = {
-      id,
-      x,
-      y,
-      type,
-      name: itemNameByType(type)
-    };
+    state.items[id] = { id, x, y, type, name: itemNameByType(type) };
   }
 
   return state;
 }
 
-/* --- Utility helpers --- */
+/* -------------------------
+   Utilities
+   ------------------------- */
 function replaceChar(str, index, ch) {
   return str.substr(0, index) + ch + str.substr(index + 1);
 }
@@ -127,10 +114,10 @@ function randomMonsterType() {
 
 function monsterStatsByType(type) {
   switch (type) {
-    case 'demon': return { hp: 12, atk: 4 };
-    case 'snake': return { hp: 6, atk: 2 };
-    case 'zombie': return { hp: 8, atk: 3 };
-    default: return { hp: 5, atk: 1 };
+    case 'demon': return { hp: 12, atk: 4, xp: 20 };
+    case 'snake': return { hp: 6, atk: 2, xp: 8 };
+    case 'zombie': return { hp: 8, atk: 3, xp: 12 };
+    default: return { hp: 5, atk: 1, xp: 5 };
   }
 }
 
@@ -143,93 +130,91 @@ function itemNameByType(type) {
   }
 }
 
-/* --- Player ensure/spawn --- */
+/* XP / Leveling helper
+   - XP to next level: 20 * level  (simple)
+   - Level up grants +4 maxHp, +1 atk, and full heal to max
+*/
+function xpToNextLevel(level) {
+  return 20 * level;
+}
+
+function tryLevelUp(player) {
+  let leveled = false;
+  while (player.xp >= xpToNextLevel(player.level)) {
+    player.xp -= xpToNextLevel(player.level);
+    player.level++;
+    player.maxHp += 4;
+    player.atk += 1;
+    player.hp = player.maxHp; // heal on level
+    leveled = true;
+  }
+  return leveled;
+}
+
+/* -------------------------
+   Player ensure/spawn
+   ------------------------- */
 function ensurePlayer(state, username) {
   if (!state.players[username]) {
-    // spawn at center floor tile or first available
-    let spawnX, spawnY;
     const centerY = Math.floor(state.map.length / 2);
     const centerX = Math.floor(state.map[0].length / 2);
-
-    if (state.map[centerY][centerX] === '.') {
-      spawnX = centerX; spawnY = centerY;
-    } else {
-      // find first floor tile
+    let spawnX = centerX, spawnY = centerY;
+    if (state.map[centerY][centerX] !== '.') {
       const tiles = getAllFloorTiles(state.map);
-      if (tiles.length > 0) {
-        [spawnX, spawnY] = tiles[0];
-      } else {
-        // fallback to center
-        spawnX = centerX; spawnY = centerY;
-      }
+      if (tiles.length > 0) [spawnX, spawnY] = tiles[0];
     }
-
     state.players[username] = {
       x: spawnX,
       y: spawnY,
       hp: 20,
       maxHp: 20,
-      atk: 3, // base attack
-      inventory: []
+      atk: 3,
+      inventory: [],
+      xp: 0,
+      level: 1
     };
+  } else {
+    // ensure xp/level exist for older sessions
+    const p = state.players[username];
+    if (typeof p.xp === 'undefined') p.xp = 0;
+    if (typeof p.level === 'undefined') p.level = 1;
+    if (typeof p.inventory === 'undefined') p.inventory = [];
+    if (typeof p.atk === 'undefined') p.atk = 3;
+    if (typeof p.hp === 'undefined') p.hp = p.maxHp || 20;
   }
 }
 
-/* --- Render map to emoji-based ASCII (no ANSI) --- */
+/* -------------------------
+   Emoji map rendering
+   ------------------------- */
 function renderAsciiMap(state, username) {
-  // Tiles as emojis
-  const WALL = "🟥";     // wall
-  const FLOOR = "⬜";    // floor
-  const PLAYER = "🧙‍♂️"; // player icon
-  const OTHER = "👤";    // other players
-  const MONSTER_ICONS = {
-    demon: "👹",
-    snake: "🐍",
-    zombie: "🧟"
-  };
-  const ITEM_ICONS = {
-    sword: "🗡️",
-    potion: "🧪",
-    gem: "💎"
-  };
+  const WALL = "🟥";
+  const FLOOR = "⬜";
+  const PLAYER = "🧙‍♂️";
+  const OTHER = "👤";
+  const MONSTER_ICONS = { demon: "👹", snake: "🐍", zombie: "🧟" };
+  const ITEM_ICONS = { sword: "🗡️", potion: "🧪", gem: "💎" };
 
-  // work with a 2D array of "cells", but we'll place emojis instead of single characters
-  const mapCopy = state.map.map(row => row.split(''));
+  const overlays = {}; // "x,y" -> char
 
-  // overlay items (we will represent items by single-character placeholders first)
-  // We'll create a map of coordinates to what to show (priority: player > monster > item)
-  const overlays = {}; // "x,y" -> {type: 'player'|'monster'|'item', char: emoji}
-
-  // place items
-  for (const item of Object.values(state.items)) {
-    const key = `${item.x},${item.y}`;
-    overlays[key] = overlays[key] || { type: 'item', char: ITEM_ICONS[item.type] || '❔' };
+  for (const it of Object.values(state.items)) {
+    overlays[`${it.x},${it.y}`] = ITEM_ICONS[it.type] || '❔';
   }
-
-  // place monsters
   for (const m of Object.values(state.monsters)) {
-    const key = `${m.x},${m.y}`;
-    overlays[key] = { type: 'monster', char: MONSTER_ICONS[m.type] || '👾' };
+    overlays[`${m.x},${m.y}`] = MONSTER_ICONS[m.type] || '👾';
+  }
+  for (const [pname, p] of Object.entries(state.players)) {
+    overlays[`${p.x},${p.y}`] = (pname === username) ? PLAYER : OTHER;
   }
 
-  // place players (player overwrites)
-  for (const [pname, pos] of Object.entries(state.players)) {
-    const key = `${pos.x},${pos.y}`;
-    const char = (pname === username) ? PLAYER : OTHER;
-    overlays[key] = { type: 'player', char };
-  }
-
-  // Build rows using emoji tiles: walls/floors replaced, then overlay emojis placed on top
   const rows = [];
   for (let y = 0; y < state.map.length; y++) {
     let rowStr = '';
     for (let x = 0; x < state.map[y].length; x++) {
       const base = state.map[y][x];
-      let tileEmoji = base === '#' ? WALL : FLOOR;
+      let tileEmoji = (base === '#') ? WALL : FLOOR;
       const key = `${x},${y}`;
-      if (overlays[key]) {
-        tileEmoji = overlays[key].char;
-      }
+      if (overlays[key]) tileEmoji = overlays[key];
       rowStr += tileEmoji;
     }
     rows.push(rowStr);
@@ -237,32 +222,161 @@ function renderAsciiMap(state, username) {
   return rows.join('\n');
 }
 
-/* --- Command processing --- */
+/* -------------------------
+   Monster AI & actions
+   ------------------------- */
+
+/*
+ - For each monster:
+   - If adjacent to any player -> attack that player
+   - Else if player within aggro range -> move one step toward nearest player (simple path: reduce manhattan)
+   - Else random walk with small chance
+ - Avoid walking into walls, other monsters, or players
+*/
+function monstersAct(state) {
+  const monsters = Object.values(state.monsters);
+  const players = Object.entries(state.players).map(([name, p]) => ({ name, ...p }));
+
+  // Build occupancy maps to avoid collisions
+  const occupied = new Set();
+  for (const m of monsters) occupied.add(`${m.x},${m.y}`);
+  for (const p of players) occupied.add(`${p.x},${p.y}`);
+
+  // We'll update positions in a new object to avoid conflicts
+  const updates = {};
+
+  for (const m of monsters) {
+    if (!state.monsters[m.id]) continue; // might have died earlier
+    // find nearest player
+    let best = null;
+    let bestDist = 1e9;
+    for (const p of players) {
+      const d = Math.abs(p.x - m.x) + Math.abs(p.y - m.y);
+      if (d < bestDist) { bestDist = d; best = p; }
+    }
+
+    if (!best) continue;
+
+    // if adjacent -> attack
+    if (bestDist === 1) {
+      // attack player
+      const damage = Math.max(1, m.atk + Math.floor(Math.random() * 2));
+      const playerObj = state.players[best.name];
+      playerObj.hp -= damage;
+      // if player dies -> respawn and drop inventory
+      let narrative = `The ${m.type} attacks ${best.name} for ${damage} damage.`;
+      if (playerObj.hp <= 0) {
+        // drop inventory
+        const drops = playerObj.inventory.splice(0, playerObj.inventory.length);
+        drops.forEach(it => {
+          const id = state.nextItemId++;
+          state.items[id] = { id, x: playerObj.x, y: playerObj.y, type: it.type, name: it.name };
+        });
+        playerObj.hp = Math.floor(playerObj.maxHp / 2);
+        const centerY = Math.floor(state.map.length / 2);
+        const centerX = Math.floor(state.map[0].length / 2);
+        playerObj.x = centerX; playerObj.y = centerY;
+        // narrative appended by caller (we return narrative at end of turn)
+      }
+      // no movement occurs for attacker
+      continue;
+    }
+
+    // if player within aggro range (5), move toward them
+    if (bestDist <= 5) {
+      const dx = Math.sign(best.x - m.x);
+      const dy = Math.sign(best.y - m.y);
+      // try horizontal then vertical (try both)
+      const tryPositions = [
+        { x: m.x + dx, y: m.y },
+        { x: m.x, y: m.y + dy },
+        { x: m.x + dx, y: m.y + dy } // diagonal attempt rarely
+      ];
+      let moved = false;
+      for (const pos of tryPositions) {
+        if (!isWalkable(state, pos.x, pos.y)) continue;
+        const key = `${pos.x},${pos.y}`;
+        if (occupied.has(key)) continue;
+        // reserve new position
+        updates[m.id] = { x: pos.x, y: pos.y };
+        occupied.delete(`${m.x},${m.y}`);
+        occupied.add(key);
+        moved = true;
+        break;
+      }
+      if (moved) continue;
+    }
+
+    // otherwise small chance to random-walk
+    if (Math.random() < 0.3) {
+      const cand = shuffleDirs().map(d => ({ x: m.x + d.x, y: m.y + d.y }));
+      for (const pos of cand) {
+        if (!isWalkable(state, pos.x, pos.y)) continue;
+        const key = `${pos.x},${pos.y}`;
+        if (occupied.has(key)) continue;
+        updates[m.id] = { x: pos.x, y: pos.y };
+        occupied.delete(`${m.x},${m.y}`);
+        occupied.add(key);
+        break;
+      }
+    }
+  }
+
+  // apply updates
+  for (const idStr of Object.keys(updates)) {
+    const id = Number(idStr);
+    const u = updates[id];
+    if (state.monsters[id]) {
+      state.monsters[id].x = u.x;
+      state.monsters[id].y = u.y;
+    }
+  }
+}
+
+/* helpers used by monstersAct */
+function isWalkable(state, x, y) {
+  if (y < 0 || y >= state.map.length || x < 0 || x >= state.map[0].length) return false;
+  if (state.map[y][x] !== '.') return false;
+  // check monsters & players occupancy
+  for (const m of Object.values(state.monsters)) {
+    if (m.x === x && m.y === y) return false;
+  }
+  for (const p of Object.values(state.players)) {
+    if (p.x === x && p.y === y) return false;
+  }
+  return true;
+}
+
+function shuffleDirs() {
+  const dirs = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+  shuffleArray(dirs);
+  return dirs;
+}
+
+/* -------------------------
+   Command processing
+   ------------------------- */
 function processCommand(state, username, command) {
   const trimmed = (command || '').trim();
   if (!trimmed) {
-    return {
-      state,
-      narrative: `**${username}** sent an empty command.`,
-      asciiMap: renderAsciiMap(state, username)
-    };
+    return { state, narrative: `**${username}** sent an empty command.`, asciiMap: renderAsciiMap(state, username) };
   }
   const lower = trimmed.toLowerCase();
-  state.turn = (state.turn || 0);
 
-  // admin spawn dungeon (for testing) - only player named 'owner' can use or you can allow everyone
+  // /spawn regenerates a fresh dungeon (admin or testing)
   if (lower.startsWith('/spawn')) {
     const newState = generateRandomState();
-    // keep turn number
-    newState.turn = state.turn + 1;
-    return {
-      state: newState,
-      narrative: `**${username}** regenerated the dungeon.`,
-      asciiMap: renderAsciiMap(newState, username)
-    };
+    newState.turn = (state.turn || 0) + 1;
+    return { state: newState, narrative: `**${username}** regenerated the dungeon.`, asciiMap: renderAsciiMap(newState, username) };
   }
 
-  // ensure player exists
+  // Ensure player exists and state fields are present (migration safety)
+  if (!state.monsters) state.monsters = {};
+  if (!state.items) state.items = {};
+  if (typeof state.nextMonsterId === 'undefined') state.nextMonsterId = 1;
+  if (typeof state.nextItemId === 'undefined') state.nextItemId = 1;
+  if (typeof state.turn === 'undefined') state.turn = 0;
+
   ensurePlayer(state, username);
   const player = state.players[username];
 
@@ -271,25 +385,22 @@ function processCommand(state, username, command) {
     state.turn++;
     const nearby = describeNearby(state, player.x, player.y);
     const narrative = `**${username}** looks around the dungeon.\n\n${nearby}`;
+    // monsters may still act on look? we will not move monsters on look to let player inspect safely
     return { state, narrative, asciiMap: renderAsciiMap(state, username) };
   }
 
   // /inventory
   if (lower === '/inventory') {
     const inv = player.inventory.length ? player.inventory.map((it, i) => `${i+1}. ${it.name}`).join('\n') : '_empty_';
-    return {
-      state,
-      narrative: `**${username}** opens their inventory:\n${inv}`,
-      asciiMap: renderAsciiMap(state, username)
-    };
+    return { state, narrative: `**${username}** opens their inventory:\n${inv}`, asciiMap: renderAsciiMap(state, username) };
   }
 
-  // /use <itemName>
+  // /use <item>
   if (lower.startsWith('/use ')) {
     const arg = trimmed.slice(5).trim().toLowerCase();
     const idx = player.inventory.findIndex(it => it.type === arg || it.name.toLowerCase().includes(arg));
     if (idx < 0) {
-      return { state, narrative: `**${username}** doesn't have a "${arg}" to use.`, asciiMap: renderAsciiMap(state, username) };
+      return { state, narrative: `**${username}** doesn't have "${arg}".`, asciiMap: renderAsciiMap(state, username) };
     }
     const item = player.inventory.splice(idx, 1)[0];
     let narrative = `**${username}** uses ${item.name}.`;
@@ -298,30 +409,31 @@ function processCommand(state, username, command) {
       player.hp = Math.min(player.maxHp, player.hp + heal);
       narrative += ` Restored ${heal} HP (HP: ${player.hp}/${player.maxHp}).`;
     } else if (item.type === 'sword') {
-      // equip sword: add to atk permanently for simplicity
       player.atk += 2;
-      narrative += ` ${player.name || username} feels stronger (+2 ATK).`;
+      narrative += ` ${username} feels stronger (+2 ATK).`;
     } else {
-      narrative += ` Nothing obvious happens.`;
+      narrative += ` Nothing happens.`;
     }
     state.turn++;
+    monstersAct(state); // monsters react after player's use
     return { state, narrative, asciiMap: renderAsciiMap(state, username) };
   }
 
   // /pickup
   if (lower === '/pickup') {
-    // find item at player's tile
-    const itemId = Object.values(state.items).find(it => it.x === player.x && it.y === player.y);
-    if (!itemId) {
+    const itemEntry = Object.values(state.items).find(it => it.x === player.x && it.y === player.y);
+    if (!itemEntry) {
+      // monsters act even when trying to pickup nothing
+      monstersAct(state);
+      state.turn++;
       return { state, narrative: `**${username}** finds nothing to pick up here.`, asciiMap: renderAsciiMap(state, username) };
     }
-    const id = itemId.id;
+    const id = itemEntry.id;
     const item = state.items[id];
-    // add to inventory
     player.inventory.push({ id: item.id, type: item.type, name: item.name });
-    // remove from map
     delete state.items[id];
     state.turn++;
+    monstersAct(state);
     return { state, narrative: `**${username}** picked up ${item.name}.`, asciiMap: renderAsciiMap(state, username) };
   }
 
@@ -334,23 +446,24 @@ function processCommand(state, username, command) {
     if (dir === 'south') ty++;
     if (dir === 'east') tx++;
     if (dir === 'west') tx--;
-    // bounds
     if (ty < 0 || ty >= state.map.length || tx < 0 || tx >= state.map[0].length) {
+      monstersAct(state); state.turn++;
       return { state, narrative: `**${username}** bumps into the edge of the dungeon.`, asciiMap: renderAsciiMap(state, username) };
     }
     const tile = state.map[ty][tx];
     if (tile !== '.') {
+      monstersAct(state); state.turn++;
       return { state, narrative: `**${username}** bumps into a wall.`, asciiMap: renderAsciiMap(state, username) };
     }
-    // check if monster occupies target tile (can't move into monster)
     const monsterThere = Object.values(state.monsters).find(m => m.x === tx && m.y === ty);
     if (monsterThere) {
+      // cannot walk into monster
+      monstersAct(state); state.turn++;
       return { state, narrative: `**${username}** cannot move: a ${monsterThere.type} blocks the way!`, asciiMap: renderAsciiMap(state, username) };
     }
-    // move
     player.x = tx; player.y = ty;
     state.turn++;
-    // auto-pickup if there's an item? (no automatic pickup)
+    monstersAct(state);
     return { state, narrative: `**${username}** moves ${dir}.`, asciiMap: renderAsciiMap(state, username) };
   }
 
@@ -363,54 +476,54 @@ function processCommand(state, username, command) {
     if (dir === 'south') ty++;
     if (dir === 'east') tx++;
     if (dir === 'west') tx--;
-    // check bounds
     if (ty < 0 || ty >= state.map.length || tx < 0 || tx >= state.map[0].length) {
-      return { state, narrative: `**${username}** swings wildly at nothing.`, asciiMap: renderAsciiMap(state, username) };
+      monstersAct(state); state.turn++;
+      return { state, narrative: `**${username}** swings at nothing.`, asciiMap: renderAsciiMap(state, username) };
     }
-    // find monster at that tile
     const target = Object.values(state.monsters).find(m => m.x === tx && m.y === ty);
     if (!target) {
+      monstersAct(state); state.turn++;
       return { state, narrative: `**${username}** swings at empty air — no monster there.`, asciiMap: renderAsciiMap(state, username) };
     }
 
     // player attack
-    const dmg = Math.max(1, player.atk + (Math.floor(Math.random() * 3) - 1)); // small randomness
+    const dmg = Math.max(1, player.atk + (Math.floor(Math.random() * 3) - 1));
     target.hp -= dmg;
     let narrative = `**${username}** attacks the ${target.type} for ${dmg} damage (HP left: ${Math.max(0, target.hp)}).`;
 
-    // if monster dies
+    // if monster dies -> award XP and possibly drop
     if (target.hp <= 0) {
       narrative += ` The ${target.type} dies!`;
-      // drop a gem or potion with some chance
-      const drop = Math.random();
-      if (drop < 0.5) {
+      const stats = monsterStatsByType(target.type);
+      player.xp = (player.xp || 0) + (stats.xp || 5);
+      narrative += ` Gained ${stats.xp || 5} XP.`;
+      // drop chance
+      if (Math.random() < 0.5) {
         const id = state.nextItemId++;
         const itemType = (Math.random() < 0.5) ? 'gem' : 'potion';
         state.items[id] = { id, x: target.x, y: target.y, type: itemType, name: itemNameByType(itemType) };
-        narrative += ` It dropped a ${state.items[id].name}.`;
+        narrative += ` It dropped ${state.items[id].name}.`;
       }
-      // remove monster
       delete state.monsters[target.id];
+      // level up check
+      if (tryLevelUp(player)) narrative += `\n**${username}** leveled up to level ${player.level}! (+4 HP, +1 ATK)`;
       state.turn++;
+      monstersAct(state);
       return { state, narrative, asciiMap: renderAsciiMap(state, username) };
     }
 
-    // monster retaliates if still alive
-    const monAtk = Math.max(1, target.atk + (Math.floor(Math.random() * 2))); // small randomness
+    // monster retaliates
+    const monAtk = Math.max(1, target.atk + Math.floor(Math.random() * 2));
     player.hp -= monAtk;
     narrative += ` The ${target.type} counterattacks for ${monAtk} damage (You HP: ${Math.max(0, player.hp)}/${player.maxHp}).`;
 
     // if player dies
     if (player.hp <= 0) {
-      // respawn player at center with half HP and drop all inventory
-      const dropItems = player.inventory.splice(0, player.inventory.length);
-      // scatter drops at player's pos
-      dropItems.forEach(it => {
+      const drops = player.inventory.splice(0, player.inventory.length);
+      drops.forEach(it => {
         const id = state.nextItemId++;
         state.items[id] = { id, x: player.x, y: player.y, type: it.type, name: it.name };
       });
-
-      // respawn
       player.hp = Math.floor(player.maxHp / 2);
       const centerY = Math.floor(state.map.length / 2);
       const centerX = Math.floor(state.map[0].length / 2);
@@ -419,10 +532,11 @@ function processCommand(state, username, command) {
     }
 
     state.turn++;
+    monstersAct(state);
     return { state, narrative, asciiMap: renderAsciiMap(state, username) };
   }
 
-  // default unknown
+  // default unknown command
   return {
     state,
     narrative: `**${username}** tried an unknown command. Use \`/look\`, \`/move <direction>\`, \`/attack <direction>\`, \`/pickup\`, \`/inventory\`, or \`/use <item>\`.`,
@@ -430,8 +544,10 @@ function processCommand(state, username, command) {
   };
 }
 
-/* --- Utility: describe nearby entities --- */
-function describeNearby(state, x, y, radius = 3) {
+/* -------------------------
+   Nearby description
+   ------------------------- */
+function describeNearby(state, x, y, radius = 4) {
   const found = [];
   for (const m of Object.values(state.monsters)) {
     const d = Math.abs(m.x - x) + Math.abs(m.y - y);
@@ -445,12 +561,14 @@ function describeNearby(state, x, y, radius = 3) {
   return found.join('\n');
 }
 
-/* --- Exported API --- */
+/* -------------------------
+   Exports
+   ------------------------- */
 module.exports = {
   loadState,
   saveState,
   ensurePlayer,
   renderAsciiMap,
   processCommand,
-  generateRandomState // exported so you can call from other scripts if needed
+  generateRandomState
 };
