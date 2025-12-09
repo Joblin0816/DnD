@@ -23,7 +23,7 @@
     },
     "yazhinishenbagan10-create": {
       "x": 5,
-      "y": 4,
+      "y": 5,
       "hp": 20,
       "maxHp": 20,
       "atk": 3,
@@ -35,7 +35,7 @@
   "monsters": {
     "1": {
       "id": 1,
-      "x": 8,
+      "x": 7,
       "y": 2,
       "type": "snake",
       "hp": 6,
@@ -44,7 +44,7 @@
     "2": {
       "id": 2,
       "x": 3,
-      "y": 1,
+      "y": 2,
       "type": "snake",
       "hp": 6,
       "atk": 2
@@ -59,7 +59,7 @@
     },
     "4": {
       "id": 4,
-      "x": 2,
+      "x": 3,
       "y": 7,
       "type": "snake",
       "hp": 6,
@@ -67,7 +67,7 @@
     },
     "5": {
       "id": 5,
-      "x": 4,
+      "x": 5,
       "y": 6,
       "type": "demon",
       "hp": 12,
@@ -75,7 +75,7 @@
     },
     "6": {
       "id": 6,
-      "x": 6,
+      "x": 5,
       "y": 3,
       "type": "snake",
       "hp": 6,
@@ -126,7 +126,7 @@
       "name": "Shiny Gem ($50)"
     }
   },
-  "turn": 18,
+  "turn": 19,
   "nextMonsterId": 7,
   "nextItemId": 7,
   "playerIcons": {
