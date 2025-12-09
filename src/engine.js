@@ -73,11 +73,13 @@ function renderAsciiMap(state, username) {
   
   // Place all players on the map
   for (const [playerName, position] of Object.entries(state.players)) {
-    const char = playerName === username ? '@' : '*';
+    const char = playerName === username ? '🧙‍♂️' : '👤';
     
     // Make sure position is valid
-    if (position.y >= 0 && position.y < mapCopy.length &&
-        position.x >= 0 && position.x < mapCopy[position.y].length) {
+    if (
+      position.y >= 0 && position.y < mapCopy.length &&
+      position.x >= 0 && position.x < mapCopy[position.y].length
+    ) {
       mapCopy[position.y][position.x] = char;
     }
   }
