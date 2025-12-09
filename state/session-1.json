@@ -1,6 +1,6 @@
 {
   "sessionId": 1,
-  "turn": 2,
+  "turn": 3,
   "map": [
     "#####",
     "#...#",
@@ -11,7 +11,7 @@
   "players": {
     "Joblin0816": {
       "x": 2,
-      "y": 2
+      "y": 3
     }
   },
   "dmEvents": []
