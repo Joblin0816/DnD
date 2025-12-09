@@ -10,7 +10,18 @@
     "#.....#...#",
     "###########"
   ],
-  "players": {},
+  "players": {
+    "Joblin0816": {
+      "x": 5,
+      "y": 4,
+      "hp": 20,
+      "maxHp": 20,
+      "atk": 3,
+      "inventory": [],
+      "xp": 0,
+      "level": 1
+    }
+  },
   "monsters": {
     "1": {
       "id": 1,
@@ -105,7 +116,11 @@
       "name": "Shiny Gem ($50)"
     }
   },
-  "turn": 16,
+  "turn": 17,
   "nextMonsterId": 7,
-  "nextItemId": 7
+  "nextItemId": 7,
+  "playerIcons": {
+    "Joblin0816": "🧙‍♂️"
+  },
+  "nextPlayerIconIndex": 1
 }
