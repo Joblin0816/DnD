@@ -156,13 +156,30 @@ function tryLevelUp(player) {
    ------------------------- */
 function ensurePlayer(state, username) {
   if (!state.players[username]) {
+    // assign next unique player emoji
+    if (!state.playerIcons) state.playerIcons = {}; // store emoji assignment table
+    if (!state.nextPlayerIconIndex) state.nextPlayerIconIndex = 0;
+
+    const PLAYER_ICONS = [
+      "🧙‍♂️","🧝‍♂️","🧚‍♂️","🧛‍♂️","🧞‍♂️",
+      "👨‍🚀","👩‍🚀","🤺","🕵️‍♂️","🧟‍♂️",
+      "👨‍🔬","👩‍🎨","👨‍🎤","👨‍💻","👩‍💻"
+    ];
+
+    const icon = PLAYER_ICONS[state.nextPlayerIconIndex % PLAYER_ICONS.length];
+    state.playerIcons[username] = icon;
+    state.nextPlayerIconIndex++;
+
+    // Spawn location
     const centerY = Math.floor(state.map.length / 2);
     const centerX = Math.floor(state.map[0].length / 2);
     let spawnX = centerX, spawnY = centerY;
+
     if (state.map[centerY][centerX] !== '.') {
       const tiles = getAllFloorTiles(state.map);
       if (tiles.length > 0) [spawnX, spawnY] = tiles[0];
     }
+
     state.players[username] = {
       x: spawnX,
       y: spawnY,
@@ -173,16 +190,9 @@ function ensurePlayer(state, username) {
       xp: 0,
       level: 1
     };
-  } else {
-    // ensure xp/level exist for older sessions
-    const p = state.players[username];
-    if (typeof p.xp === 'undefined') p.xp = 0;
-    if (typeof p.level === 'undefined') p.level = 1;
-    if (typeof p.inventory === 'undefined') p.inventory = [];
-    if (typeof p.atk === 'undefined') p.atk = 3;
-    if (typeof p.hp === 'undefined') p.hp = p.maxHp || 20;
   }
 }
+
 
 /* -------------------------
    Emoji map rendering
@@ -204,7 +214,9 @@ function renderAsciiMap(state, username) {
     overlays[`${m.x},${m.y}`] = MONSTER_ICONS[m.type] || '👾';
   }
   for (const [pname, p] of Object.entries(state.players)) {
-    overlays[`${p.x},${p.y}`] = (pname === username) ? PLAYER : OTHER;
+    const icon = state.playerIcons[pname] || "👤";
+overlays[`${p.x},${p.y}`] = icon;
+
   }
 
   const rows = [];
