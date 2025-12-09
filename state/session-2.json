@@ -14,7 +14,7 @@
     "Joblin0816": {
       "x": 5,
       "y": 4,
-      "hp": 1,
+      "hp": 6,
       "maxHp": 20,
       "atk": 3,
       "inventory": [],
@@ -26,7 +26,7 @@
     "1": {
       "id": 1,
       "x": 5,
-      "y": 6,
+      "y": 5,
       "type": "zombie",
       "hp": 8,
       "atk": 3
@@ -36,13 +36,13 @@
       "x": 5,
       "y": 3,
       "type": "zombie",
-      "hp": 8,
+      "hp": 5,
       "atk": 3
     },
     "3": {
       "id": 3,
       "x": 4,
-      "y": 5,
+      "y": 4,
       "type": "snake",
       "hp": 6,
       "atk": 2
@@ -50,7 +50,7 @@
     "4": {
       "id": 4,
       "x": 6,
-      "y": 3,
+      "y": 4,
       "type": "demon",
       "hp": 12,
       "atk": 4
@@ -116,7 +116,7 @@
       "name": "Shiny Gem ($50)"
     }
   },
-  "turn": 12,
+  "turn": 13,
   "nextMonsterId": 7,
   "nextItemId": 7
 }
