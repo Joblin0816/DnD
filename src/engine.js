@@ -68,14 +68,20 @@ function ensurePlayer(state, username) {
  * . = floor
  */
 function renderAsciiMap(state, username) {
-  // Create a copy of the map as a 2D array of characters
+  // ANSI Color Codes
+  const GREEN = "\u001b[32m";   // floor
+  const BLUE = "\u001b[34m";    // walls
+  const RED = "\u001b[31m";     // your player
+  const YELLOW = "\u001b[33m";  // other players
+  const RESET = "\u001b[0m";
+
+  // Copy map into a 2D character array
   const mapCopy = state.map.map(row => row.split(''));
-  
-  // Place all players on the map
+
+  // Place players
   for (const [playerName, position] of Object.entries(state.players)) {
-    const char = playerName === username ? '🧙‍♂️' : '👤';
-    
-    // Make sure position is valid
+    const char = playerName === username ? "🧙‍♂️" : "👤";
+
     if (
       position.y >= 0 && position.y < mapCopy.length &&
       position.x >= 0 && position.x < mapCopy[position.y].length
@@ -83,10 +89,25 @@ function renderAsciiMap(state, username) {
       mapCopy[position.y][position.x] = char;
     }
   }
-  
-  // Convert back to string
-  return mapCopy.map(row => row.join('')).join('\n');
+
+  // Build colorized map
+  const colored = mapCopy
+    .map(row =>
+      row
+        .map(cell => {
+          if (cell === "#") return BLUE + cell + RESET;        // walls
+          if (cell === ".") return GREEN + cell + RESET;       // floor
+          if (cell === "🧙‍♂️") return RED + cell + RESET;     // you
+          if (cell === "👤") return YELLOW + cell + RESET;     // other players
+          return cell;
+        })
+        .join("")
+    )
+    .join("\n");
+
+  return colored;
 }
+
 
 /**
  * Process a command for a specific player
