@@ -1,39 +1,28 @@
 {
   "map": [
     "###########",
-    "#..#.##...#",
+    "#...#.....#",
+    "##..#.....#",
+    "##.......##",
+    "#.#.......#",
+    "#...#.....#",
+    "##........#",
     "#.....#...#",
-    "#....#...##",
-    "#......#.##",
-    "#.#......##",
-    "#......#..#",
-    "#..#....#.#",
     "###########"
   ],
-  "players": {
-    "Joblin0816": {
-      "x": 5,
-      "y": 4,
-      "hp": 20,
-      "maxHp": 20,
-      "atk": 3,
-      "inventory": [],
-      "xp": 0,
-      "level": 1
-    }
-  },
+  "players": {},
   "monsters": {
     "1": {
       "id": 1,
-      "x": 9,
-      "y": 1,
-      "type": "demon",
-      "hp": 12,
-      "atk": 4
+      "x": 8,
+      "y": 2,
+      "type": "snake",
+      "hp": 6,
+      "atk": 2
     },
     "2": {
       "id": 2,
-      "x": 8,
+      "x": 3,
       "y": 1,
       "type": "snake",
       "hp": 6,
@@ -41,86 +30,82 @@
     },
     "3": {
       "id": 3,
-      "x": 2,
-      "y": 1,
-      "type": "zombie",
-      "hp": 8,
-      "atk": 3
+      "x": 3,
+      "y": 5,
+      "type": "snake",
+      "hp": 6,
+      "atk": 2
     },
     "4": {
       "id": 4,
-      "x": 9,
-      "y": 2,
-      "type": "demon",
-      "hp": 12,
-      "atk": 4
+      "x": 2,
+      "y": 7,
+      "type": "snake",
+      "hp": 6,
+      "atk": 2
     },
     "5": {
       "id": 5,
-      "x": 2,
-      "y": 2,
-      "type": "zombie",
-      "hp": 8,
-      "atk": 3
-    },
-    "6": {
-      "id": 6,
-      "x": 1,
-      "y": 1,
+      "x": 4,
+      "y": 6,
       "type": "demon",
       "hp": 12,
       "atk": 4
+    },
+    "6": {
+      "id": 6,
+      "x": 6,
+      "y": 3,
+      "type": "snake",
+      "hp": 6,
+      "atk": 2
     }
   },
   "items": {
     "1": {
       "id": 1,
-      "x": 3,
-      "y": 6,
+      "x": 6,
+      "y": 2,
       "type": "sword",
       "name": "Rusty Sword (+2 ATK)"
     },
     "2": {
       "id": 2,
-      "x": 4,
-      "y": 1,
+      "x": 9,
+      "y": 5,
       "type": "potion",
       "name": "Healing Potion (+8 HP)"
     },
     "3": {
       "id": 3,
-      "x": 1,
-      "y": 5,
+      "x": 3,
+      "y": 6,
       "type": "gem",
       "name": "Shiny Gem ($50)"
     },
     "4": {
       "id": 4,
       "x": 5,
-      "y": 4,
+      "y": 6,
       "type": "sword",
       "name": "Rusty Sword (+2 ATK)"
     },
     "5": {
       "id": 5,
-      "x": 2,
-      "y": 4,
+      "x": 3,
+      "y": 7,
       "type": "potion",
       "name": "Healing Potion (+8 HP)"
     },
     "6": {
       "id": 6,
-      "x": 8,
-      "y": 6,
+      "x": 2,
+      "y": 5,
       "type": "gem",
       "name": "Shiny Gem ($50)"
     }
   },
-  "turn": 15,
+  "turn": 16,
   "nextMonsterId": 7,
-  "nextItemId": 7,
-  "playerIcons": {
-    "Joblin0816": "🧙‍♂️"
-  },
-  "nextPlayerIconIndex": 1
+  "nextItemId": 7
 }
