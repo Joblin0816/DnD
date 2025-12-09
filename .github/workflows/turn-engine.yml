@@ -10,11 +10,11 @@ permissions:
 
 jobs:
   process-turn:
-    # Only run if the issue has the dnd-session label and comment starts with /
     if: |
       contains(github.event.issue.labels.*.name, 'dnd-session') &&
       startsWith(github.event.comment.body, '/')
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,34 +35,37 @@ jobs:
         with:
           script: |
             const { execSync } = require('child_process');
-            
+
             try {
-              // Run the turn handler
+              // Run turn handler
               const output = execSync('node src/turn-handler.js', {
                 encoding: 'utf8',
                 env: process.env
               });
-              
-              // Parse the JSON output
+
               const result = JSON.parse(output.trim());
-              
-              // Post the result as a comment
+
+              // Respond to issue with ANSI color block
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: `${result.narrative}\n\n\`\`\`\n${result.asciiMap}\n\`\`\``
+                body: `${result.narrative}
+
+            \`\`\`ansi
+            ${result.asciiMap}
+            \`\`\`
+            `
               });
-              
+
             } catch (error) {
-              console.error('Error processing turn:', error);
-              
-              // Post error message
+              console.error("Turn error:", error);
+
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: `⚠️ Error processing command: ${error.message}`
+                body: `⚠️ Error processing turn: ${error.message}`
               });
             }
 
