@@ -547,6 +547,25 @@ function processCommand(state, username, command) {
     monstersAct(state);
     return { state, narrative, asciiMap: renderAsciiMap(state, username) };
   }
+// /stats command
+if (lower === '/stats') {
+    const icon = state.playerIcons?.[username] || "🧙‍♂️";
+    const xpNeeded = xpToNextLevel(player.level);
+    const narrative =
+`### ${icon} ${username}'s Stats
+
+- **HP:** ${player.hp} / ${player.maxHp}
+- **ATK:** ${player.atk}
+- **Level:** ${player.level}
+- **XP:** ${player.xp} / ${xpNeeded}
+- **Inventory:** ${player.inventory.length} items`;
+
+    return {
+        state,
+        narrative,
+        asciiMap: renderAsciiMap(state, username)
+    };
+}
 
   // default unknown command
   return {
