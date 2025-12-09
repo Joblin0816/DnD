@@ -34,7 +34,7 @@ jobs:
           COMMAND: ${{ github.event.comment.body }}
         with:
           script: |
-           const { execSync } = require('child_process');
+            const { execSync } = require('child_process');
             
             try {
               // Run the turn handler
@@ -51,12 +51,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: `${result.narrative}
-
-                \`\`\`ansi
-                ${result.asciiMap}
-                \`\`\`
-                ``
+                body: `${result.narrative}\n\n\`\`\`\n${result.asciiMap}\n\`\`\``
               });
               
             } catch (error) {
