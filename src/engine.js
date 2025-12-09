@@ -68,19 +68,17 @@ function ensurePlayer(state, username) {
  * . = floor
  */
 function renderAsciiMap(state, username) {
-  // ANSI Color Codes
-  const GREEN = "\u001b[32m";   // floor
-  const BLUE = "\u001b[34m";    // walls
-  const RED = "\u001b[31m";     // your player
-  const YELLOW = "\u001b[33m";  // other players
-  const RESET = "\u001b[0m";
+  // Emoji tiles
+  const WALL = "🟥";       // or "⬛" "🧱" "🚧"
+  const FLOOR = "⬜";      // or "▫️" "⬝"
+  const PLAYER = "🧙‍♂️";   // your icon
+  const OTHER = "👤";      // other players
 
-  // Copy map into a 2D character array
   const mapCopy = state.map.map(row => row.split(''));
 
   // Place players
   for (const [playerName, position] of Object.entries(state.players)) {
-    const char = playerName === username ? "🧙‍♂️" : "👤";
+    const char = playerName === username ? PLAYER : OTHER;
 
     if (
       position.y >= 0 && position.y < mapCopy.length &&
@@ -90,22 +88,20 @@ function renderAsciiMap(state, username) {
     }
   }
 
-  // Build colorized map
-  const colored = mapCopy
+  // Convert map rows to emoji tiles
+  return mapCopy
     .map(row =>
       row
         .map(cell => {
-          if (cell === "#") return BLUE + cell + RESET;        // walls
-          if (cell === ".") return GREEN + cell + RESET;       // floor
-          if (cell === "🧙‍♂️") return RED + cell + RESET;     // you
-          if (cell === "👤") return YELLOW + cell + RESET;     // other players
+          if (cell === "#") return WALL;
+          if (cell === ".") return FLOOR;
+          if (cell === PLAYER) return PLAYER;
+          if (cell === OTHER) return OTHER;
           return cell;
         })
         .join("")
     )
     .join("\n");
-
-  return colored;
 }
 
 
